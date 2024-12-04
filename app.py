@@ -3,6 +3,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import openai
 import requests
+from dotenv import load_dotenv
+
+# Загрузка переменных окружения из .env файла
+load_dotenv()
 
 app = FastAPI()
 
@@ -44,6 +48,7 @@ def generate_post(topic):
         )
         title = response_title.choices[0].message.content.strip()
     except Exception as e:
+        print(f"Error generating title: {e}")  # Логирование ошибки
         raise HTTPException(status_code=500, detail=f"Ошибка при генерации заголовка: {str(e)}")
 
     # Генерация мета-описания
@@ -58,6 +63,7 @@ def generate_post(topic):
         )
         meta_description = response_meta.choices[0].message.content.strip()
     except Exception as e:
+        print(f"Error generating meta description: {e}")  # Логирование ошибки
         raise HTTPException(status_code=500, detail=f"Ошибка при генерации мета-описания: {str(e)}")
 
     # Генерация контента поста
@@ -76,6 +82,7 @@ def generate_post(topic):
         )
         post_content = response_post.choices[0].message.content.strip()
     except Exception as e:
+        print(f"Error generating post content: {e}")  # Логирование ошибки
         raise HTTPException(status_code=500, detail=f"Ошибка при генерации контента поста: {str(e)}")
 
     return {
@@ -95,4 +102,6 @@ async def heartbeat_api():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000)
+    host = os.getenv("HOST", "0.0.0.0")  # По умолчанию 0.0.0.0
+    port = int(os.getenv("PORT", 8000))  # По умолчанию порт 8000
+    uvicorn.run("app:app", host=host, port=port)
